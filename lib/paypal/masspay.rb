@@ -22,7 +22,6 @@ module Paypal
       response = ''
       
       new_body = body.dup
-      Rails.logger.info(new_body)
       payments.each_with_index do |payment, i|
         new_body = new_body.merge({
           "L_EMAIL#{i}" => payment[:email],
@@ -30,7 +29,6 @@ module Paypal
           "L_UNIQUEID#{i}" => payment[:unique_id],
           "L_NOTE#{i}" => payment[:note]
         })
-        Rails.logger.info(new_body)
       end
       
       response = self.post(request_uri.to_s, :body => new_body).body
@@ -54,10 +52,8 @@ module Paypal
       }
       body.merge!("EMAILSUBJECT" => email_subject) if email_subject
       response = ''
-      Rails.logger.info(receiver_email)
       if receiver_email.is_a?(Array)
         new_body = body.dup
-        Rails.logger.info(new_body)
         (receiver_email.length.to_f / max).ceil.times do |group|
           offset = group * MASSPAY_LIMIT
           receiver_email[offset..(offset + MASSPAY_LIMIT - 1)].each_with_index do |email, i|
@@ -67,7 +63,6 @@ module Paypal
               "L_UNIQUEID#{i}" => unique_id.is_a?(Array) ? unique_id[i] : unique_id,
               "L_NOTE#{i}" => note.is_a?(Array) ? note[i] : note})
           end
-          Rails.logger.info(new_body)
           response = self.post(request_uri.to_s, :body => new_body).body
         end
       else
